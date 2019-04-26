@@ -32,6 +32,8 @@ import org.springframework.lang.Nullable;
 public interface RequestToViewNameTranslator {
 
 	/**
+	 * 如果有的处理器没有给ModelAndView对象设置试图名，
+	 * 所以就需要从request出获取ViewName
 	 * Translate the given {@link HttpServletRequest} into a view name.
 	 * @param request the incoming {@link HttpServletRequest} providing
 	 * the context from which a view name is to be resolved

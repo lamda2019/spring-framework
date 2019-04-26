@@ -49,43 +49,14 @@ import org.springframework.lang.Nullable;
  */
 public interface HandlerAdapter {
 
-	/**
-	 * Given a handler instance, return whether or not this {@code HandlerAdapter}
-	 * can support it. Typical HandlerAdapters will base the decision on the handler
-	 * type. HandlerAdapters will usually only support one handler type each.
-	 * <p>A typical implementation:
-	 * <p>{@code
-	 * return (handler instanceof MyHandler);
-	 * }
-	 * @param handler handler object to check
-	 * @return whether or not this object can use the given handler
-	 */
+	//判断是否可以使用某个Handler
 	boolean supports(Object handler);
 
-	/**
-	 * Use the given handler to handle this request.
-	 * The workflow that is required may vary widely.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @param handler handler to use. This object must have previously been passed
-	 * to the {@code supports} method of this interface, which must have
-	 * returned {@code true}.
-	 * @throws Exception in case of errors
-	 * @return a ModelAndView object with the name of the view and the required
-	 * model data, or {@code null} if the request has been handled directly
-	 */
+	//具体使用Handler干活,处理器干完活以后，就会返回一个ModelAndView对象
 	@Nullable
 	ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
 
-	/**
-	 * Same contract as for HttpServlet's {@code getLastModified} method.
-	 * Can simply return -1 if there's no support in the handler class.
-	 * @param request current HTTP request
-	 * @param handler handler to use
-	 * @return the lastModified value for the given handler
-	 * @see javax.servlet.http.HttpServlet#getLastModified
-	 * @see org.springframework.web.servlet.mvc.LastModified#getLastModified
-	 */
+	//获取资源的Last-Modified，Last-Modified是资源最后一次修改的时间
 	long getLastModified(HttpServletRequest request, Object handler);
 
 }

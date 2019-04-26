@@ -91,25 +91,16 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 
-	/**
-	 * Exposes the native {@link HttpServletRequest} that we're wrapping.
-	 */
+
 	public final HttpServletRequest getRequest() {
 		return this.request;
 	}
 
-	/**
-	 * Exposes the native {@link HttpServletResponse} that we're wrapping (if any).
-	 */
 	@Nullable
 	public final HttpServletResponse getResponse() {
 		return this.response;
 	}
 
-	/**
-	 * Exposes the {@link HttpSession} that we're wrapping.
-	 * @param allowCreate whether to allow creation of a new session if none exists yet
-	 */
 	@Nullable
 	protected final HttpSession getSession(boolean allowCreate) {
 		if (isRequestActive()) {
@@ -140,7 +131,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		return session;
 	}
 
-
+	//TODO:重点看
 	@Override
 	public Object getAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
@@ -167,10 +158,11 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			return null;
 		}
 	}
-
+    //TODO:重点看
 	@Override
 	public void setAttribute(String name, Object value, int scope) {
 		if (scope == SCOPE_REQUEST) {
+			//请求执行完了
 			if (!isRequestActive()) {
 				throw new IllegalStateException(
 						"Cannot set request attribute - request is not active anymore!");
@@ -183,7 +175,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			session.setAttribute(name, value);
 		}
 	}
-
+   //TODO:重点看
 	@Override
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {

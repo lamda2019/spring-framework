@@ -26,11 +26,7 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Store and retrieve {@link FlashMap} instances to and from the HTTP session.
- *
- * @author Rossen Stoyanchev
- * @author Juergen Hoeller
- * @since 3.1.1
+ * FlashMapManager的默认实现，将参数保存到session中
  */
 public class SessionFlashMapManager extends AbstractFlashMapManager {
 

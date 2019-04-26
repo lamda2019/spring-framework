@@ -59,6 +59,9 @@ import org.springframework.web.util.WebUtils;
  * @see org.apache.commons.fileupload.servlet.ServletFileUpload
  * @see org.apache.commons.fileupload.disk.DiskFileItemFactory
  */
+/**
+ * Apache  commons-fileupload
+ * */
 public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		implements MultipartResolver, ServletContextAware {
 
@@ -125,8 +128,10 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	}
 
 	@Override
-	public MultipartHttpServletRequest resolveMultipart(final HttpServletRequest request) throws MultipartException {
+	public MultipartHttpServletRequest resolveMultipart(final HttpServletRequest request)
+			throws MultipartException {
 		Assert.notNull(request, "Request must not be null");
+		// 默认resolveLazily是false
 		if (this.resolveLazily) {
 			return new DefaultMultipartHttpServletRequest(request) {
 				@Override
@@ -138,10 +143,12 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 				}
 			};
 		}
+		// 默认是走else的逻辑
 		else {
 			MultipartParsingResult parsingResult = parseRequest(request);
 			return new DefaultMultipartHttpServletRequest(request, parsingResult.getMultipartFiles(),
-					parsingResult.getMultipartParameters(), parsingResult.getMultipartParameterContentTypes());
+					parsingResult.getMultipartParameters(),
+					parsingResult.getMultipartParameterContentTypes());
 		}
 	}
 

@@ -23,25 +23,7 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
-/**
- * Holder class to expose the web request in the form of a thread-bound
- * {@link RequestAttributes} object. The request will be inherited
- * by any child threads spawned by the current thread if the
- * {@code inheritable} flag is set to {@code true}.
- *
- * <p>Use {@link RequestContextListener} or
- * {@link org.springframework.web.filter.RequestContextFilter} to expose
- * the current web request. Note that
- * {@link org.springframework.web.servlet.DispatcherServlet}
- * already exposes the current request by default.
- *
- * @author Juergen Hoeller
- * @author Rod Johnson
- * @since 2.0
- * @see RequestContextListener
- * @see org.springframework.web.filter.RequestContextFilter
- * @see org.springframework.web.servlet.DispatcherServlet
- */
+
 public abstract class RequestContextHolder  {
 
 	private static final boolean jsfPresent =

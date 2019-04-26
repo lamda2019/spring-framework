@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
  * @since 4.3
  * @see DefaultResourceLoader#addProtocolResolver
  */
+//函数式接口
 @FunctionalInterface
 public interface ProtocolResolver {
 

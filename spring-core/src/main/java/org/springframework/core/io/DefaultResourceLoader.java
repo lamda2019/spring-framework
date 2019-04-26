@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.context.support.ClassPathXmlApplicationContext
  */
 public class DefaultResourceLoader implements ResourceLoader {
-
+    //@Nullable 表示定义的字段可以为空.
 	@Nullable
 	private ClassLoader classLoader;
 
@@ -143,7 +143,9 @@ public class DefaultResourceLoader implements ResourceLoader {
 	@Override
 	public Resource getResource(String location) {
 		Assert.notNull(location, "Location must not be null");
-
+        /**
+        *通过 ProtocolResolver 来加载资源，成功返回 Resource
+        * */
 		for (ProtocolResolver protocolResolver : this.protocolResolvers) {
 			Resource resource = protocolResolver.resolve(location, this);
 			if (resource != null) {
@@ -152,9 +154,10 @@ public class DefaultResourceLoader implements ResourceLoader {
 		}
 
 		if (location.startsWith("/")) {
-			return getResourceByPath(location);
+			return getResourceByPath(location);//返回ClassPathContextResource(location, getClassLoader())
 		}
 		else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
+			//private final CLASSPATH_URL_PREFIX="classpath:";
 			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
 		}
 		else {
@@ -163,7 +166,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 				URL url = new URL(location);
 				return (ResourceUtils.isFileURL(url) ? new FileUrlResource(url) : new UrlResource(url));
 			}
-			catch (MalformedURLException ex) {
+			catch (MalformedURLException ex) {//MalformedURLException:发生了格式错误的URL
 				// No URL -> resolve as resource path.
 				return getResourceByPath(location);
 			}

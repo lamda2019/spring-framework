@@ -16,17 +16,16 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
 
 /**
  * Abstract base class for {@link HandlerExceptionResolver} implementations.
@@ -45,7 +44,9 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
-	/** Logger available to subclasses. */
+	/**
+	 * Logger available to subclasses.
+	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
@@ -102,6 +103,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * to the logger's configuration.
 	 * <p>Default is no warn logging. Specify this setting to activate warn logging into a specific
 	 * category. Alternatively, override the {@link #logException} method for custom logging.
+	 *
 	 * @see org.apache.commons.logging.LogFactory#getLog(String)
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
@@ -130,9 +132,11 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	@Nullable
 	public ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
-
+		// 1. 判断当前的ExceptionResolver是否能够解析所传入的处理器抛出的异常
 		if (shouldApplyTo(request, handler)) {
+			// 1.1. 设置response
 			prepareResponse(ex, response);
+			// 1.2  解析异常
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
 				// Print warn message when warn logger is not enabled...
@@ -144,6 +148,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			}
 			return result;
 		}
+		// 2. 如果当前的ExceptionResolver不能解析处理器抛出的异常，则返回null，并交给下一个ExceptionResolver来处理
 		else {
 			return null;
 		}
@@ -161,6 +166,9 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * for the given request and handler
 	 * @see #setMappedHandlers
 	 * @see #setMappedHandlerClasses
+	 */
+	/**
+	 * <h2>判断当前的ExceptionResolver是否能够解析所传入的处理器抛出的异常</h2>
 	 */
 	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
 		if (handler != null) {
@@ -183,7 +191,8 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * Log the given exception at warn level, provided that warn logging has been
 	 * activated through the {@link #setWarnLogCategory "warnLogCategory"} property.
 	 * <p>Calls {@link #buildLogMessage} in order to determine the concrete message to log.
-	 * @param ex the exception that got thrown during handler execution
+	 *
+	 * @param ex      the exception that got thrown during handler execution
 	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @see #setWarnLogCategory
 	 * @see #buildLogMessage
@@ -197,7 +206,8 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	/**
 	 * Build a log message for the given exception, occurred during processing the given request.
-	 * @param ex the exception that got thrown during handler execution
+	 *
+	 * @param ex      the exception that got thrown during handler execution
 	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @return the log message to use
 	 */
@@ -210,7 +220,8 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * <p>The default implementation prevents the response from being cached,
 	 * if the {@link #setPreventResponseCaching "preventResponseCaching"} property
 	 * has been set to "true".
-	 * @param ex the exception that got thrown during handler execution
+	 *
+	 * @param ex       the exception that got thrown during handler execution
 	 * @param response current HTTP response
 	 * @see #preventCaching
 	 */
@@ -223,6 +234,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	/**
 	 * Prevents the response from being cached, through setting corresponding
 	 * HTTP {@code Cache-Control: no-store} header.
+	 *
 	 * @param response current HTTP response
 	 */
 	protected void preventCaching(HttpServletResponse response) {
@@ -237,11 +249,12 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * Note that this template method will be invoked <i>after</i> checking whether this
 	 * resolved applies ("mappedHandlers" etc), so an implementation may simply proceed
 	 * with its actual exception handling.
-	 * @param request current HTTP request
+	 *
+	 * @param request  current HTTP request
 	 * @param response current HTTP response
-	 * @param handler the executed handler, or {@code null} if none chosen at the time
-	 * of the exception (for example, if multipart resolution failed)
-	 * @param ex the exception that got thrown during handler execution
+	 * @param handler  the executed handler, or {@code null} if none chosen at the time
+	 *                 of the exception (for example, if multipart resolution failed)
+	 * @param ex       the exception that got thrown during handler execution
 	 * @return a corresponding {@code ModelAndView} to forward to,
 	 * or {@code null} for default processing in the resolution chain
 	 */

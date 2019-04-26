@@ -46,37 +46,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 import org.springframework.web.context.support.StandardServletEnvironment;
 
-/**
- * Simple extension of {@link javax.servlet.http.HttpServlet} which treats
- * its config parameters ({@code init-param} entries within the
- * {@code servlet} tag in {@code web.xml}) as bean properties.
+/***
  *
- * <p>A handy superclass for any type of servlet. Type conversion of config
- * parameters is automatic, with the corresponding setter method getting
- * invoked with the converted value. It is also possible for subclasses to
- * specify required properties. Parameters without matching bean property
- * setter will simply be ignored.
+ * HttpServletBean主要参与了创建工作，并没有涉及请求的处理
  *
- * <p>This servlet leaves request handling to subclasses, inheriting the default
- * behavior of HttpServlet ({@code doGet}, {@code doPost}, etc).
- *
- * <p>This generic servlet base class has no dependency on the Spring
- * {@link org.springframework.context.ApplicationContext} concept. Simple
- * servlets usually don't load their own context but rather access service
- * beans from the Spring root application context, accessible via the
- * filter's {@link #getServletContext() ServletContext} (see
- * {@link org.springframework.web.context.support.WebApplicationContextUtils}).
- *
- * <p>The {@link FrameworkServlet} class is a more specific servlet base
- * class which loads its own application context. FrameworkServlet serves
- * as direct base class of Spring's full-fledged {@link DispatcherServlet}.
- *
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @see #addRequiredProperty
- * @see #initServletBean
- * @see #doGet
- * @see #doPost
+ * @param:
+ * @return:
+ * @auther: ajin
+ * @date: 2018/12/30 20:34
  */
 @SuppressWarnings("serial")
 public abstract class HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware {
@@ -144,17 +121,25 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 * @throws ServletException if bean properties are invalid (or required
 	 * properties are missing), or if subclass initialization fails.
 	 */
+	//该方法是创建 Web 容器的入口
+	//将 ServletConfig 中的配置信息设置到 HttpServletBean 的子类对象中（比如 DispatcherServlet)
 	@Override
 	public final void init() throws ServletException {
-
+		// 获取 ServletConfig 中的配置信息
 		// Set bean properties from init parameters.
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
+				/*
+				 * 为当前对象（比如 DispatcherServlet 对象）创建一个 BeanWrapper，
+				 * 方便读/写对象属性。
+				 */
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
+				//为HttpServletBean初始化BeanWrapper
 				initBeanWrapper(bw);
+				// 设置配置信息到目标对象中
 				bw.setPropertyValues(pvs, true);
 			}
 			catch (BeansException ex) {
@@ -164,7 +149,8 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 				throw ex;
 			}
 		}
-
+		// 进行后续的初始化
+		// 让子类做他们喜欢的任何初始化，在该类中initServletBean()为空，留给子类重写
 		// Let subclasses do whatever initialization they like.
 		initServletBean();
 	}

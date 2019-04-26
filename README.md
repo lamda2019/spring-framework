@@ -1,30 +1,50 @@
-# <img src="src/docs/asciidoc/images/spring-framework.png" width="80" height="80"> Spring Framework
+# 本仓库用来学习Spring框架源码
 
-This is the home of the Spring Framework: the foundation for all [Spring projects](https://spring.io/projects). Collectively the Spring Framework and the family of Spring projects is often referred to simply as "Spring". 
 
-Spring provides everything required beyond the Java programming language for creating enterprise applications for a wide range of scenarios and architectures. Please read the [Overview](https://docs.spring.io/spring/docs/current/spring-framework-reference/overview.html#spring-introduction) section as reference for a more complete introduction.
 
-## Code of Conduct
+Spring版本：5.xx
 
-This project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc). By participating, you are expected to uphold this code of conduct. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
 
-## Access to Binaries
 
-For access to artifacts or a distribution zip, see the [Spring Framework Artifacts](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Artifacts) wiki page.
+## 已完成
 
-## Documentation
 
-The Spring Framework maintains reference documentation ([published](http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/) and [source](src/docs/asciidoc)), Github [wiki pages](https://github.com/spring-projects/spring-framework/wiki), and an
-[API reference](http://docs.spring.io/spring-framework/docs/current/javadoc-api/). There are also [guides and tutorials](https://spring.io/guides) across Spring projects.
 
-## Build from Source
+目前已经完成Spring MVC大部分核心源码的学习，一些不常使用的组件，暂时没有学习到。
 
-See the [Build from Source](https://github.com/spring-projects/spring-framework/wiki/Build-from-Source) Wikipedia page and the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+现将Spring MVC学习过程中输出的一些博客整理于此，水平实在有限，惭愧！
 
-## Stay in Touch
 
-Follow [@SpringCentral](https://twitter.com/springcentral), [@SpringFramework](https://twitter.com/springframework), and its [team members](https://twitter.com/springframework/lists/team/members) on Twitter. In-depth articles can be found at [The Spring Blog](http://spring.io/blog/), and releases are announced via our [news feed](http://spring.io/blog/category/news).
 
-## License
+[1. Spring MVC基本原理](https://www.liutianruo.com/2018/12/29/Spring-MVC基本原理/)
 
-The Spring Framework is released under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
+[2. Spring MVC源码初探（一） FrameworkServlet](https://www.liutianruo.com/2018/12/31/Spring-MVC%20源码初探（一）-FrameworkServlet/)
+
+[3. Spring MVC源码初探（二） DispatcherServlet](https://www.liutianruo.com/2019/01/03/Spring-MVC%20源码初探（二）-DispatcherServlet/)
+
+[4. Spring MVC 源码初探（三）容器的创建过程](https://www.liutianruo.com/2019/01/12/Spring-MVC-源码初探（三）容器的创建过程/)
+
+[5. Spring MVC源码初探（四） HandlerMapping之 AbstractHandlerMapping](https://www.liutianruo.com/2019/01/19/Spring-MVC源码初探（四）-%20%20HandlerMapping之-AbstractHandlerMapping/)
+
+[6. Spring MVC源码初探（五）HandlerMapping之AbstractUrlHandlerMapping](https://www.liutianruo.com/2019/02/09/Spring-MVC源码初探（五）HandlerMapping之AbstractUrlHandlerMapping/)
+
+[7. Spring MVC源码初探（六）HandlerMapping之AbstractHandlerMethodMapping](https://www.liutianruo.com/2019/02/09/Spring-MVC源码初探（六）HandlerMapping之AbstractHandlerMethodMapping/)
+
+[8. Spring MVC源码初探（七） HandlerAdapter（一）](https://www.liutianruo.com/2019/03/15/Spring-MVC源码初探（七）HandlerAdapter（一）/)
+
+[9. Spring MVC源码初探（八）HandlerAdapter(二）组件](https://www.liutianruo.com/2019/03/16/Spring-MVC源码初探（八）HandlerAdapter-二）组件/)
+
+[10. Spring MVC源码初探（九） ViewResolver](https://www.liutianruo.com/2019/03/17/Spring-MVC源码初探（九）-ViewResolver/)
+
+[11. Spring MVC源码初探（十） HandlerExceptionResolver](https://www.liutianruo.com/2019/04/10/Spring-MVC源码初探（十）-HandlerExceptionResolver/)
+
+[12. Spring MVC源码初探（十一） MultipartResolver](https://www.liutianruo.com/2019/04/11/Spring-MVC源码初探（十一）-MultipartResolver/)
+
+
+
+------
+
+**参考资料：[《看透Spring MVC》**](https://book.douban.com/subject/26696099/)
+
+感谢韩路彪老师将Spring MVC剖析得如此清楚透彻！
+

@@ -52,14 +52,14 @@ import org.springframework.web.servlet.HandlerExecutionChain;
  * @since 16.04.2003
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping implements MatchableHandlerMapping {
-
+	//处理"/"请求的处理器
 	@Nullable
 	private Object rootHandler;
 
 	private boolean useTrailingSlashMatch = false;
 
 	private boolean lazyInitHandlers = false;
-
+	//保存url与handler
 	private final Map<String, Object> handlerMap = new LinkedHashMap<>();
 
 
@@ -112,19 +112,22 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	/**
-	 * Look up a handler for the URL path of the given request.
-	 * @param request current HTTP request
-	 * @return the handler instance, or {@code null} if none found
+	 * 着重需要看的方法
+	 * 获取handler的入口方法
+	 * 0.使用url从Map中获取handler
 	 */
 	@Override
 	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		// 从map中查找Handler
 		Object handler = lookupHandler(lookupPath, request);
+		// 如果lookupHandler()没能成功返回一个Handler的话，那么就走下面的if语句
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
 			Object rawHandler = null;
+			// 1.定义一个临时变量，保存找到的原始Handler
 			if ("/".equals(lookupPath)) {
 				rawHandler = getRootHandler();
 			}
@@ -132,54 +135,47 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				rawHandler = getDefaultHandler();
 			}
 			if (rawHandler != null) {
-				// Bean name or resolved handler?
+				// 2.如果是String类型则到容器中查找具体的Bean
 				if (rawHandler instanceof String) {
 					String handlerName = (String) rawHandler;
 					rawHandler = obtainApplicationContext().getBean(handlerName);
 				}
+				// 3.可以用来校验找到的Handler和request是否匹配，是模板方法，而且子类也没有使用
 				validateHandler(rawHandler, request);
-				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
+				//给查询到Handler注册两个拦截器(TODO:拦截器的作用暂时不明白）
+				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath,
+						null);
 			}
 		}
 		return handler;
 	}
 
-	/**
-	 * Look up a handler instance for the given URL path.
-	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
-	 * and various Ant-style pattern matches, e.g. a registered "/t*" matches
-	 * both "/test" and "/team". For details, see the AntPathMatcher class.
-	 * <p>Looks for the most exact pattern, where most exact is defined as
-	 * the longest path pattern.
-	 * @param urlPath the URL the bean is mapped to
-	 * @param request current HTTP request (to expose the path within the mapping to)
-	 * @return the associated handler instance, or {@code null} if not found
-	 * @see #exposePathWithinMapping
-	 * @see org.springframework.util.AntPathMatcher
-	 */
+	//从map中查找Handler，需要写一个方法来实现，因为有不同的情况，而不是一两行代码能解决的
 	@Nullable
 	protected Object lookupHandler(String urlPath, HttpServletRequest request) throws Exception {
-		// Direct match?
+		// 1.直接从Map中获取Handler（这个Map的初始化，暂时不考虑）
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
-			// Bean name or resolved handler?
+			// 1.1.如果是String类型则从容器中获取
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
 				handler = obtainApplicationContext().getBean(handlerName);
 			}
+			// 1.2验证Handler，具体的实现交给子类
 			validateHandler(handler, request);
+			//给查到的Handler注册两个拦截器
 			return buildPathExposingHandler(handler, urlPath, urlPath, null);
 		}
 
-		// Pattern match?
+		// 2.Pattern匹配，比如使用带*号的模式与url进行匹配(/art/1/*,或者@Pathvariable)
 		List<String> matchingPatterns = new ArrayList<>();
 		for (String registeredPattern : this.handlerMap.keySet()) {
 			if (getPathMatcher().match(registeredPattern, urlPath)) {
 				matchingPatterns.add(registeredPattern);
-			}
-			else if (useTrailingSlashMatch()) {
-				if (!registeredPattern.endsWith("/") && getPathMatcher().match(registeredPattern + "/", urlPath)) {
-					matchingPatterns.add(registeredPattern +"/");
+			} else if (useTrailingSlashMatch()) {
+				if (!registeredPattern.endsWith("/") && getPathMatcher().
+						match(registeredPattern + "/", urlPath)) {
+					matchingPatterns.add(registeredPattern + "/");
 				}
 			}
 		}
@@ -204,7 +200,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 							"Could not find handler for best pattern match [" + bestMatch + "]");
 				}
 			}
-			// Bean name or resolved handler?
+			// 3.如果是String类型则从容器中获取
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
 				handler = obtainApplicationContext().getBean(handlerName);
@@ -212,12 +208,13 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			validateHandler(handler, request);
 			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestMatch, urlPath);
 
-			// There might be multiple 'best patterns', let's make sure we have the correct URI template variables
-			// for all of them
+			// 4.之前是通过sort方法进行排序，然后拿第一个作为bestPatternMatch的，
+			// 不过有可能有多个Pattern的顺序相同，也就是sort方法返回0，这里就是处理这种情况
 			Map<String, String> uriTemplateVariables = new LinkedHashMap<>();
 			for (String matchingPattern : matchingPatterns) {
 				if (patternComparator.compare(bestMatch, matchingPattern) == 0) {
-					Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchingPattern, urlPath);
+					Map<String, String> vars = getPathMatcher().
+							extractUriTemplateVariables(matchingPattern, urlPath);
 					Map<String, String> decodedVars = getUrlPathHelper().decodePathVariables(request, vars);
 					uriTemplateVariables.putAll(decodedVars);
 				}
@@ -228,7 +225,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			return buildPathExposingHandler(handler, bestMatch, pathWithinMapping, uriTemplateVariables);
 		}
 
-		// No handler found...
+		// 6.没找到Handler则返回null
 		return null;
 	}
 
@@ -236,6 +233,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * Validate the given handler against the current request.
 	 * <p>The default implementation is empty. Can be overridden in subclasses,
 	 * for example to enforce specific preconditions expressed in URL mappings.
+	 *
 	 * @param handler the handler object to validate
 	 * @param request current HTTP request
 	 * @throws Exception if validation failed
@@ -243,19 +241,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	protected void validateHandler(Object handler, HttpServletRequest request) throws Exception {
 	}
 
-	/**
-	 * Build a handler object for the given raw handler, exposing the actual
-	 * handler, the {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}, as well as
-	 * the {@link #URI_TEMPLATE_VARIABLES_ATTRIBUTE} before executing the handler.
-	 * <p>The default implementation builds a {@link HandlerExecutionChain}
-	 * with a special interceptor that exposes the path attribute and uri template variables
-	 * @param rawHandler the raw handler to expose
-	 * @param pathWithinMapping the path to expose before executing the handler
-	 * @param uriTemplateVariables the URI template variables, can be {@code null} if no variables found
-	 * @return the final handler object
-	 */
+
 	protected Object buildPathExposingHandler(Object rawHandler, String bestMatchingPattern,
-			String pathWithinMapping, @Nullable Map<String, String> uriTemplateVariables) {
+											  String pathWithinMapping,
+											  @Nullable Map<String, String> uriTemplateVariables) {
 
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
 		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
@@ -267,12 +256,13 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 	/**
 	 * Expose the path within the current mapping as request attribute.
+	 *
 	 * @param pathWithinMapping the path within the current mapping
-	 * @param request the request to expose the path to
+	 * @param request           the request to expose the path to
 	 * @see #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
 	 */
 	protected void exposePathWithinMapping(String bestMatchingPattern, String pathWithinMapping,
-			HttpServletRequest request) {
+										   HttpServletRequest request) {
 
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatchingPattern);
 		request.setAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
@@ -280,8 +270,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 	/**
 	 * Expose the URI templates variables as request attribute.
+	 *
 	 * @param uriTemplateVariables the URI template variables
-	 * @param request the request to expose the path to
+	 * @param request              the request to expose the path to
 	 * @see #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
 	 */
 	protected void exposeUriTemplateVariables(Map<String, String> uriTemplateVariables, HttpServletRequest request) {
@@ -294,8 +285,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		if (getPathMatcher().match(pattern, lookupPath)) {
 			return new RequestMatchResult(pattern, lookupPath, getPathMatcher());
-		}
-		else if (useTrailingSlashMatch()) {
+		} else if (useTrailingSlashMatch()) {
 			if (!pattern.endsWith("/") && getPathMatcher().match(pattern + "/", lookupPath)) {
 				return new RequestMatchResult(pattern + "/", lookupPath, getPathMatcher());
 			}
@@ -304,13 +294,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	/**
-	 * Register the specified handler for the given URL paths.
-	 * @param urlPaths the URLs that the bean should be mapped to
-	 * @param beanName the name of the handler bean
-	 * @throws BeansException if the handler couldn't be registered
-	 * @throws IllegalStateException if there is a conflicting handler registered
+	 * 注册多个url到处理器Handler
 	 */
-	protected void registerHandler(String[] urlPaths, String beanName) throws BeansException, IllegalStateException {
+	protected void registerHandler(String[] urlPaths, String beanName)
+			throws BeansException, IllegalStateException {
 		Assert.notNull(urlPaths, "URL path array must not be null");
 		for (String urlPath : urlPaths) {
 			registerHandler(urlPath, beanName);
@@ -318,19 +305,16 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	/**
-	 * Register the specified handler for the given URL path.
-	 * @param urlPath the URL the bean should be mapped to
-	 * @param handler the handler instance or handler bean name String
-	 * (a bean name will automatically be resolved into the corresponding handler bean)
-	 * @throws BeansException if the handler couldn't be registered
-	 * @throws IllegalStateException if there is a conflicting handler registered
+	 * 注册url到Handler
 	 */
-	protected void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
+	protected void registerHandler(String urlPath, Object handler)
+			throws BeansException, IllegalStateException {
 		Assert.notNull(urlPath, "URL path must not be null");
 		Assert.notNull(handler, "Handler object must not be null");
 		Object resolvedHandler = handler;
 
-		// Eagerly resolve handler if referencing singleton via name.
+		// 供上一个registerHandler方法调用
+		// 1.如果Handler是String类型而且没有设置lazyInitHandlers则从SpringMVC容器中获取Handler
 		if (!this.lazyInitHandlers && handler instanceof String) {
 			String handlerName = (String) handler;
 			ApplicationContext applicationContext = obtainApplicationContext();
@@ -338,29 +322,27 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				resolvedHandler = applicationContext.getBean(handlerName);
 			}
 		}
-
+		//相同的url，只能由同一个Handler来处理
 		Object mappedHandler = this.handlerMap.get(urlPath);
 		if (mappedHandler != null) {
 			if (mappedHandler != resolvedHandler) {
 				throw new IllegalStateException(
 						"Cannot map " + getHandlerDescription(handler) + " to URL path [" + urlPath +
-						"]: There is already " + getHandlerDescription(mappedHandler) + " mapped.");
+								"]: There is already " + getHandlerDescription(mappedHandler) + " mapped.");
 			}
-		}
-		else {
+		} else {
+			//如果Map中没有这个处理器，有如下三种处理情况
 			if (urlPath.equals("/")) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Root mapping to " + getHandlerDescription(handler));
 				}
 				setRootHandler(resolvedHandler);
-			}
-			else if (urlPath.equals("/*")) {
+			} else if (urlPath.equals("/*")) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Default mapping to " + getHandlerDescription(handler));
 				}
 				setDefaultHandler(resolvedHandler);
-			}
-			else {
+			} else {
 				this.handlerMap.put(urlPath, resolvedHandler);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Mapped [" + urlPath + "] onto " + getHandlerDescription(handler));
@@ -369,6 +351,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 	}
 
+	//获取Handler描述信息
 	private String getHandlerDescription(Object handler) {
 		return (handler instanceof String ? "'" + handler + "'" : handler.toString());
 	}
@@ -378,6 +361,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * Return the registered handlers as an unmodifiable Map, with the registered path
 	 * as key and the handler object (or handler bean name in case of a lazy-init handler)
 	 * as value.
+	 *
 	 * @see #getDefaultHandler()
 	 */
 	public final Map<String, Object> getHandlerMap() {
@@ -395,6 +379,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	/**
 	 * Special interceptor for exposing the
 	 * {@link AbstractUrlHandlerMapping#PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE} attribute.
+	 *
 	 * @see AbstractUrlHandlerMapping#exposePathWithinMapping
 	 */
 	private class PathExposingHandlerInterceptor extends HandlerInterceptorAdapter {
@@ -421,6 +406,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	/**
 	 * Special interceptor for exposing the
 	 * {@link AbstractUrlHandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE} attribute.
+	 *
 	 * @see AbstractUrlHandlerMapping#exposePathWithinMapping
 	 */
 	private class UriTemplateVariablesHandlerInterceptor extends HandlerInterceptorAdapter {

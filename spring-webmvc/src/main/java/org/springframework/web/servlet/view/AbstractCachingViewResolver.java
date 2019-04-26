@@ -145,21 +145,27 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	@Override
 	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
+		//判断是否开启了缓存功能，如果没开启，则直接创建视图
 		if (!isCache()) {
+			//实际创建视图
 			return createView(viewName, locale);
 		}
 		else {
+			//如果开启了缓存，则检查视图是否已经在缓存中
 			Object cacheKey = getCacheKey(viewName, locale);
 			View view = this.viewAccessCache.get(cacheKey);
+			//如果视图不在缓存中
 			if (view == null) {
 				synchronized (this.viewCreationCache) {
 					view = this.viewCreationCache.get(cacheKey);
 					if (view == null) {
+						//创建视图
 						// Ask the subclass to create the View object.
 						view = createView(viewName, locale);
 						if (view == null && this.cacheUnresolved) {
 							view = UNRESOLVED_VIEW;
 						}
+						//将创建好的视图保存到缓存中
 						if (view != null) {
 							this.viewAccessCache.put(cacheKey, view);
 							this.viewCreationCache.put(cacheKey, view);
@@ -167,6 +173,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 					}
 				}
 			}
+			//如果视图在缓存中存在，则直接返回
 			else {
 				if (logger.isTraceEnabled()) {
 					logger.trace(formatKey(cacheKey) + "served from cache");

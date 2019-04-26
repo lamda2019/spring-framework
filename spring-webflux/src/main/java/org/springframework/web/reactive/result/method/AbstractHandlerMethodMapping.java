@@ -48,31 +48,10 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 
-/**
- * Abstract base class for {@link HandlerMapping} implementations that define
- * a mapping between a request and a {@link HandlerMethod}.
- *
- * <p>For each registered handler method, a unique mapping is maintained with
- * subclasses defining the details of the mapping type {@code <T>}.
- *
- * @author Rossen Stoyanchev
- * @author Brian Clozel
- * @since 5.0
- * @param <T> the mapping for a {@link HandlerMethod} containing the conditions
- * needed to match the handler method to incoming request.
- */
+//静态类，其实就是一个模板
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
 
-	/**
-	 * Bean name prefix for target beans behind scoped proxies. Used to exclude those
-	 * targets from handler method detection, in favor of the corresponding proxies.
-	 * <p>We're not checking the autowire-candidate status here, which is how the
-	 * proxy target filtering problem is being handled at the autowiring level,
-	 * since autowire-candidate may have been turned to {@code false} for other
-	 * reasons, while still expecting the bean to be eligible for handler methods.
-	 * <p>Originally defined in {@link org.springframework.aop.scope.ScopedProxyUtils}
-	 * but duplicated here to avoid a hard dependency on the spring-aop module.
-	 */
+
 	private static final String SCOPED_TARGET_NAME_PREFIX = "scopedTarget.";
 
 	/**
@@ -92,11 +71,20 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		ALLOW_CORS_CONFIG.setAllowCredentials(true);
 	}
 
-
+   /**
+	* Mapping注册表
+	* */
 	private final MappingRegistry mappingRegistry = new MappingRegistry();
 
 
 	// TODO: handlerMethodMappingNamingStrategy
+	/**
+	 * 这是我根据奶奶的博客新增加的代码，总有种代码不对劲的感觉，我没修改源代码啊？？？？？？
+	 * Mapping 命名策略
+	 *
+	@Nullable
+	private HandlerMethodMappingNamingStrategy<T> namingStrategy;
+	 */
 
 	/**
 	 * Return a (read-only) map with all mappings and HandlerMethod's.
@@ -163,12 +151,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
-	/**
-	 * Scan beans in the ApplicationContext, detect and register handler methods.
-	 * @see #isHandler(Class)
-	 * @see #getMappingForMethod(Method, Class)
-	 * @see #handlerMethodsInitialized(Map)
-	 */
+
 	protected void initHandlerMethods() {
 		String[] beanNames = obtainApplicationContext().getBeanNamesForType(Object.class);
 
@@ -232,25 +215,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				.collect(Collectors.joining("\n\t", "\n\t" + formattedType + ":" + "\n\t", ""));
 	}
 
-	/**
-	 * Register a handler method and its unique mapping. Invoked at startup for
-	 * each detected handler method.
-	 * @param handler the bean name of the handler or the handler instance
-	 * @param method the method to register
-	 * @param mapping the mapping conditions associated with the handler method
-	 * @throws IllegalStateException if another method was already registered
-	 * under the same mapping
-	 */
+
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
 		this.mappingRegistry.register(mapping, handler, method);
 	}
 
-	/**
-	 * Create the HandlerMethod instance.
-	 * @param handler either a bean name or an actual handler instance
-	 * @param method the target method
-	 * @return the created HandlerMethod
-	 */
+
 	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
 		HandlerMethod handlerMethod;
 		if (handler instanceof String) {

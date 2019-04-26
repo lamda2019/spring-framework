@@ -40,6 +40,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
+//加了final，只能继承别人，但自己不能被继承
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
 	private final Set<String> patterns;

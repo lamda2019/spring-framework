@@ -103,13 +103,16 @@ public final class ModelFactory {
 	 * @param handlerMethod the method for which the model is initialized
 	 * @throws Exception may arise from {@code @ModelAttribute} methods
 	 */
-	public void initModel(NativeWebRequest request, ModelAndViewContainer container, HandlerMethod handlerMethod)
+	public void initModel(NativeWebRequest request, ModelAndViewContainer container,
+						  HandlerMethod handlerMethod)
 			throws Exception {
-
+        //从SessionAttributes中取出保存的参数，并合并到container中
 		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);
 		container.mergeAttributes(sessionAttributes);
+		//执行注解了@ModelAttribute的方法，并将结果设置到Model中
 		invokeModelAttributeMethods(request, container);
-
+		//遍历既注解了@ModelAttribute又在@SessionAttributes注解中的参数
+		//TODO:继续看源码写博客
 		for (String name : findSessionAttributeArguments(handlerMethod)) {
 			if (!container.containsAttribute(name)) {
 				Object value = this.sessionAttributesHandler.retrieveAttribute(request, name);
@@ -129,18 +132,22 @@ public final class ModelFactory {
 			throws Exception {
 
 		while (!this.modelMethods.isEmpty()) {
+			//获取注解了@ModelAttribute的方法
 			InvocableHandlerMethod modelMethod = getNextModelMethod(container).getHandlerMethod();
+			//获取ModelAttribute对象
 			ModelAttribute ann = modelMethod.getMethodAnnotation(ModelAttribute.class);
 			Assert.state(ann != null, "No ModelAttribute annotation");
+			//如果参数名已经再container中则跳过
 			if (container.containsAttribute(ann.name())) {
 				if (!ann.binding()) {
 					container.setBindingDisabled(ann.name());
 				}
 				continue;
 			}
-
+			//执行@ModelAttribute注解的方法
 			Object returnValue = modelMethod.invokeForRequest(request, container);
 			if (!modelMethod.isVoid()){
+				//使用getNameForReturnValue获取参数名
 				String returnValueName = getNameForReturnValue(returnValue, modelMethod.getReturnType());
 				if (!ann.binding()) {
 					container.setBindingDisabled(returnValueName);
@@ -190,13 +197,17 @@ public final class ModelFactory {
 	 */
 	public void updateModel(NativeWebRequest request, ModelAndViewContainer container) throws Exception {
 		ModelMap defaultModel = container.getDefaultModel();
+		//SessionAttributes是否使用完成，是的话，就将SessionAttributes清空
 		if (container.getSessionStatus().isComplete()){
 			this.sessionAttributesHandler.cleanupAttributes(request);
 		}
+		//否则，将container的defaultModel参数设置到SessionAttributes中
 		else {
 			this.sessionAttributesHandler.storeAttributes(request, defaultModel);
 		}
+		//判断请求是否处理完，同时如果是redirectModel的话，就不需要渲染页面；不然需要渲染页面
 		if (!container.isRequestHandled() && container.getModel() == defaultModel) {
+			//渲染页面
 			updateBindingResult(request, defaultModel);
 		}
 	}

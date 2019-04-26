@@ -38,12 +38,23 @@ public class RequestMappingInfoHandlerMethodMappingNamingStrategy
 	/** Separator between the type and method-level parts of a HandlerMethod mapping name. */
 	public static final String SEPARATOR = "#";
 
-
+  /**
+   * 重写HandlerMethodMappingNamingStrategy接口的getName方法
+   * */
 	@Override
 	public String getName(HandlerMethod handlerMethod, RequestMappingInfo mapping) {
+		// 情况一，mapping 名字非空，则使用 mapping 的名字
+		//例如：@RequestMapping(name = "login", value = "user/login") ，
+		// 这个name就是mapping的名字
+
+		//简单来说RequestMappingInfo就是@RequestMapping注解的信息
 		if (mapping.getName() != null) {
 			return mapping.getName();
 		}
+		// 情况二，使用类名大写 + "#" + 方法名
+		// 例如：@RequestMapping(value = "user/login")
+		//假设它所在的类为 UserController ，对应的方法名为 login ，
+		// 则它对应的 Mapping 的名字就是 USERCONTROLLER#login 。
 		StringBuilder sb = new StringBuilder();
 		String simpleTypeName = handlerMethod.getBeanType().getSimpleName();
 		for (int i = 0 ; i < simpleTypeName.length(); i++) {

@@ -21,31 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 
-/**
- * Interface for web-based theme resolution strategies that allows for
- * both theme resolution via the request and theme modification via
- * request and response.
- *
- * <p>This interface allows for implementations based on session,
- * cookies, etc. The default implementation is
- * {@link org.springframework.web.servlet.theme.FixedThemeResolver},
- * simply using a configured default theme.
- *
- * <p>Note that this resolver is only responsible for determining the
- * current theme name. The Theme instance for the resolved theme name
- * gets looked up by DispatcherServlet via the respective ThemeSource,
- * i.e. the current WebApplicationContext.
- *
- * <p>Use {@link org.springframework.web.servlet.support.RequestContext#getTheme()}
- * to retrieve the current theme in controllers or views, independent
- * of the actual resolution strategy.
- *
- * @author Jean-Pierre Pawlak
- * @author Juergen Hoeller
- * @since 17.06.2003
- * @see org.springframework.ui.context.Theme
- * @see org.springframework.ui.context.ThemeSource
- */
+
+//解析主题
 public interface ThemeResolver {
 
 	/**

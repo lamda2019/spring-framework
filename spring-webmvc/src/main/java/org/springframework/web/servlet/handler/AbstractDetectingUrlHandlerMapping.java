@@ -22,28 +22,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.ObjectUtils;
 
-/**
- * Abstract implementation of the {@link org.springframework.web.servlet.HandlerMapping}
- * interface, detecting URL mappings for handler beans through introspection of all
- * defined beans in the application context.
- *
- * @author Juergen Hoeller
- * @since 2.5
- * @see #determineUrlsForHandler
- */
+
 public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
 	private boolean detectHandlersInAncestorContexts = false;
 
 
-	/**
-	 * Set whether to detect handler beans in ancestor ApplicationContexts.
-	 * <p>Default is "false": Only handler beans in the current ApplicationContext
-	 * will be detected, i.e. only in the context that this HandlerMapping itself
-	 * is defined in (typically the current DispatcherServlet's context).
-	 * <p>Switch this flag on to detect handler beans in ancestor contexts
-	 * (typically the Spring root WebApplicationContext) as well.
-	 */
+
 	public void setDetectHandlersInAncestorContexts(boolean detectHandlersInAncestorContexts) {
 		this.detectHandlersInAncestorContexts = detectHandlersInAncestorContexts;
 	}
@@ -59,25 +44,20 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 		detectHandlers();
 	}
 
-	/**
-	 * Register all handlers found in the current ApplicationContext.
-	 * <p>The actual URL determination for a handler is up to the concrete
-	 * {@link #determineUrlsForHandler(String)} implementation. A bean for
-	 * which no such URLs could be determined is simply not considered a handler.
-	 * @throws org.springframework.beans.BeansException if the handler couldn't be registered
-	 * @see #determineUrlsForHandler(String)
-	 */
 	protected void detectHandlers() throws BeansException {
 		ApplicationContext applicationContext = obtainApplicationContext();
+		//1.获取容器的所有的bean的名字
 		String[] beanNames = (this.detectHandlersInAncestorContexts ?
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, Object.class) :
 				applicationContext.getBeanNamesForType(Object.class));
 
-		// Take any bean name that we can determine URLs for.
+		// 2.对每个beanName解析url,如果能解析到就注册到父类的Map中
 		for (String beanName : beanNames) {
+			//2.1 determineUrlsForHandler（beanName） 模板方法，交给子类自己去实现(根据beanName去解析处理器的urls）
 			String[] urls = determineUrlsForHandler(beanName);
+			//2.2如果能解析到url则注册到父类
 			if (!ObjectUtils.isEmpty(urls)) {
-				// URL paths found: Let's consider it a handler.
+				//2.3 父类的registerHandler方法
 				registerHandler(urls, beanName);
 			}
 		}

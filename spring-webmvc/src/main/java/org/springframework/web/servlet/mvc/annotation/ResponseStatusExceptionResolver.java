@@ -72,10 +72,12 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 		try {
 			if (ex instanceof ResponseStatusException) {
-				return resolveResponseStatusException((ResponseStatusException) ex, request, response, handler);
+				return resolveResponseStatusException((ResponseStatusException) ex,
+						request, response, handler);
 			}
 
-			ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
+			ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(),
+					ResponseStatus.class);
 			if (status != null) {
 				return resolveResponseStatus(status, request, response, handler, ex);
 			}
@@ -86,7 +88,8 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 		}
 		catch (Exception resolveEx) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Failure while trying to resolve exception [" + ex.getClass().getName() + "]", resolveEx);
+				logger.warn(
+						"Failure while trying to resolve exception [" + ex.getClass().getName() + "]", resolveEx);
 			}
 		}
 		return null;

@@ -23,25 +23,7 @@ import org.springframework.core.NamedInheritableThreadLocal;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.lang.Nullable;
 
-/**
- * Simple holder class that associates a LocaleContext instance
- * with the current thread. The LocaleContext will be inherited
- * by any child threads spawned by the current thread if the
- * {@code inheritable} flag is set to {@code true}.
- *
- * <p>Used as a central holder for the current Locale in Spring,
- * wherever necessary: for example, in MessageSourceAccessor.
- * DispatcherServlet automatically exposes its current Locale here.
- * Other applications can expose theirs too, to make classes like
- * MessageSourceAccessor automatically use that Locale.
- *
- * @author Juergen Hoeller
- * @author Nicholas Williams
- * @since 1.2
- * @see LocaleContext
- * @see org.springframework.context.support.MessageSourceAccessor
- * @see org.springframework.web.servlet.DispatcherServlet
- */
+
 public final class LocaleContextHolder {
 
 	private static final ThreadLocal<LocaleContext> localeContextHolder =

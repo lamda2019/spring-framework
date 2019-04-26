@@ -43,7 +43,7 @@ public interface RequestCondition<T> {
 	 * @return a request condition instance that is the result of combining
 	 * the two condition instances.
 	 */
-	T combine(T other);
+	T combine(T other);//合并
 
 	/**
 	 * Check if the condition matches the request returning a potentially new
@@ -58,7 +58,7 @@ public interface RequestCondition<T> {
 	 * @return a condition instance in case of a match or {@code null} otherwise.
 	 */
 	@Nullable
-	T getMatchingCondition(HttpServletRequest request);
+	T getMatchingCondition(HttpServletRequest request);//匹配
 
 	/**
 	 * Compare this condition to another condition in the context of
@@ -66,6 +66,6 @@ public interface RequestCondition<T> {
 	 * been obtained via {@link #getMatchingCondition(HttpServletRequest)}
 	 * to ensure they have content relevant to current request only.
 	 */
-	int compareTo(T other, HttpServletRequest request);
+	int compareTo(T other, HttpServletRequest request);//比较
 
 }

@@ -466,11 +466,13 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	protected View createView(String viewName, Locale locale) throws Exception {
 		// If this resolver is not supposed to handle the given view,
 		// return null to pass on to the next resolver in the chain.
+		//检查是否支持解析此逻辑视图，如果不可以解析，则返回null让别的ViewResolver去解析
 		if (!canHandle(viewName, locale)) {
 			return null;
 		}
 
 		// Check for special "redirect:" prefix.
+		//检查是不是redirect视图，是的话则返回相应视图
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
 			RedirectView view = new RedirectView(redirectUrl,
@@ -483,6 +485,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		}
 
 		// Check for special "forward:" prefix.
+		//检查是不是forward视图，是的话则返回相应视图
 		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
 			String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
 			InternalResourceView view = new InternalResourceView(forwardUrl);
@@ -490,6 +493,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		}
 
 		// Else fall back to superclass implementation: calling loadView.
+		//否则交给父类去解析,调用loadView()
 		return super.createView(viewName, locale);
 	}
 
@@ -525,8 +529,11 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 */
 	@Override
 	protected View loadView(String viewName, Locale locale) throws Exception {
+		//创建View
 		AbstractUrlBasedView view = buildView(viewName);
+		//对View进行初始化
 		View result = applyLifecycleMethods(viewName, view);
+		//检查View对应的模板是否存在，如果存在，则将初始化的视图进行返回，否则返回null交给下一个ViewResolver去处理
 		return (view.checkResource(locale) ? result : null);
 	}
 
@@ -552,6 +559,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		view.setUrl(getPrefix() + viewName + getSuffix());
 
 		String contentType = getContentType();
+		//如果contentType不为空，将其值设置给View，可以在ViewResolver中进行配置
 		if (contentType != null) {
 			view.setContentType(contentType);
 		}

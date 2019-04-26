@@ -383,18 +383,18 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request,
 			HttpServletResponse response, @Nullable HandlerMethod handlerMethod, Exception exception) {
 
+		// 获取处理异常的方法
 		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);
 		if (exceptionHandlerMethod == null) {
 			return null;
 		}
-
+		// 设置argumentResolvers和returnValueHandlers
 		if (this.argumentResolvers != null) {
 			exceptionHandlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 		}
 		if (this.returnValueHandlers != null) {
 			exceptionHandlerMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 		}
-
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
@@ -405,6 +405,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			Throwable cause = exception.getCause();
 			if (cause != null) {
 				// Expose cause as provided argument as well
+				// 执行ExceptionHandler方法解析异常
 				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, cause, handlerMethod);
 			}
 			else {
@@ -428,6 +429,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		else {
 			ModelMap model = mavContainer.getModel();
 			HttpStatus status = mavContainer.getStatus();
+			// 创建ModelAndView并返回
 			ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model, status);
 			mav.setViewName(mavContainer.getViewName());
 			if (!mavContainer.isViewReference()) {
