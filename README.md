@@ -44,7 +44,7 @@ Spring版本：5.xx
 
 ------
 
-**参考资料：[《看透Spring MVC》**](https://book.douban.com/subject/26696099/)
+**参考资料：[《看透Spring MVC》](https://book.douban.com/subject/26696099/)**
 
 感谢韩路彪老师将Spring MVC剖析得如此清楚透彻！
 
